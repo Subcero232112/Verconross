@@ -3,269 +3,849 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CosmicWave - Comparte contenido en sincronía</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+    <title>SubCode X - Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBoxhLAxA3Lgq_L_ztW8MXvj5zhbhOOyB8",
-            authDomain: "ross-9301b.firebaseapp.com",
-            projectId: "ross-9301b",
-            storageBucket: "ross-9301b.firebasestorage.app",
-            messagingSenderId: "120661854127",
-            appId: "1:120661854127:web:cbe011f5358a6ef8fa915a",
-            measurementId: "G-LJWD2K1EPY"
-        };
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #8B0000 0%, #000000 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #e0e0e0;
+        }
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const analytics = getAnalytics(app);
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 15px;
+            gap: 15px;
+        }
 
-        window.firebaseInstances = { auth, db };
-    </script>
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                height: 100vh;
+                padding: 20px;
+                gap: 20px;
+            }
+        }
+
+        .editor-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            min-height: 50vh;
+        }
+
+        @media (min-width: 768px) {
+            .editor-panel {
+                min-height: auto;
+                padding: 20px;
+            }
+        }
+
+        .panel-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .panel-title {
+            color: #ff5555;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #2a2a2a;
+            color: #ff6b6b;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #b30000, #660000);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #8B0000, #4d0000);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #4d0000, #2a0000);
+            color: white;
+        }
+
+        .file-info {
+            background: rgba(139, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            color: #ffaaaa;
+            font-size: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .editor-container {
+            flex: 1;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #0a0a0a;
+            display: flex;
+        }
+
+        .line-numbers {
+            width: 40px;
+            background: #1a1a1a;
+            color: #ff5555;
+            padding: 12px 5px;
+            font-size: 13px;
+            line-height: 1.5;
+            border-right: 1px solid #ff000033;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .code-container {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+        }
+
+        .code-editor {
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            padding: 12px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            border: none;
+            outline: none;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            white-space: pre;
+            overflow-wrap: normal;
+        }
+
+        .output-panel {
+            flex: 0 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            max-height: 40vh;
+        }
+
+        @media (min-width: 768px) {
+            .output-panel {
+                flex: 0 0 400px;
+                max-height: none;
+            }
+        }
+
+        .output-container {
+            flex: 1;
+            background: #0d0d0d;
+            border-radius: 8px;
+            padding: 12px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #e0e0e0;
+        }
+
+        .output-line {
+            margin-bottom: 6px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            word-break: break-word;
+        }
+
+        .output-error {
+            background: rgba(255, 0, 0, 0.15);
+            border-left: 3px solid #ff5555;
+        }
+
+        .output-success {
+            background: rgba(0, 128, 0, 0.15);
+            border-left: 3px solid #55aa55;
+        }
+
+        .output-debug {
+            background: rgba(255, 165, 0, 0.15);
+            border-left: 3px solid #ffaa00;
+            font-style: italic;
+        }
+
+        .syntax-help {
+            background: rgba(139, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            color: #ffaaaa;
+            font-size: 12px;
+        }
+
+        .syntax-help h4 {
+            color: #ff5555;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .syntax-help code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #ff9999;
+            display: inline-block;
+            margin: 3px 0;
+        }
+
+        /* Resaltado de sintaxis */
+        .keyword {
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        .string {
+            color: #ffaa55;
+        }
+
+        .comment {
+            color: #99aa77;
+            font-style: italic;
+        }
+
+        .variable {
+            color: #ff77cc;
+        }
+
+        .function {
+            color: #ffff55;
+        }
+
+        .number {
+            color: #55ff55;
+        }
+
+        .operator {
+            color: #ff9999;
+        }
+
+        .mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid #ff000055;
+        }
+
+        .logo {
+            font-weight: bold;
+            color: #ff5555;
+            font-size: 18px;
+        }
+
+        .mobile-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #8B0000;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff0000;
+        }
+
+        .mobile-indicator {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(139, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            backdrop-filter: blur(5px);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-indicator {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
-
-    <nav class="navbar">
-        <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24">
-                <defs>
-                    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#7303c0" />
-                        <stop offset="100%" stop-color="#ec38bc" />
-                    </linearGradient>
-                </defs>
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
-            </svg>
-            CosmicWave
-        </div>
-        <div class="nav-links">
-            <a href="#features" class="nav-link">Características</a>
-            <a href="#preview" class="nav-link">Vista Previa</a>
-        </div>
-        <div class="auth-section">
-            <div class="auth-buttons" id="authButtons">
-                <button class="btn btn-login" id="loginBtn">Iniciar Sesión</button>
-                <button class="btn btn-signup" id="signupBtn">Registrarse</button>
-            </div>
-            <div class="user-info" id="userInfo">
-                <img id="userAvatar" src="https://i.imgur.com/8Km9tLL.png" alt="Avatar">
-                <span id="userName">Usuario</span>
-                <button class="btn btn-logout" id="logoutBtn">Salir</button>
-            </div>
-        </div>
-    </nav>
-
-    <section class="hero">
-        <div class="cosmic-orb orb-1"></div>
-        <div class="cosmic-orb orb-2"></div>
-        <h1 class="hero-title">Ve videos y escucha música en sincronía con amigos</h1>
-        <p class="hero-subtitle">CosmicWave te permite disfrutar de contenido multimedia junto a tus amigos en tiempo real, sin importar dónde se encuentren. Mira películas, series o videos y chatea con ellos en un ambiente cósmico y único.</p>
-        <div class="hero-buttons">
-            <button class="btn btn-signup btn-hero" id="createRoomBtn">Crear Sala</button>
-            <button class="btn btn-login btn-hero" id="joinRoomBtn">Unirse a Sala</button>
-        </div>
-    </section>
-
-    <section class="features" id="features">
-        <div class="feature-card">
-            <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15c0-1.66 1.34-3 3-3 .35 0 .69.07 1 .18V6h5v2h-3v7.03c-.02 1.64-1.35 2.97-3 2.97-1.66 0-3-1.34-3-3z"/></svg></div>
-            <h3 class="feature-title">Sincronización Perfecta</h3>
-            <p class="feature-desc">Disfruta de películas, videos y música perfectamente sincronizados con todos los participantes, sin desfases ni retrasos.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></div>
-            <h3 class="feature-title">Chat en Vivo</h3>
-            <p class="feature-desc">Comenta cada momento con un chat interactivo y reacciona en tiempo real a lo que estás viendo con tus amigos.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></div>
-            <h3 class="feature-title">Múltiples Fuentes</h3>
-            <p class="feature-desc">Comparte contenido desde YouTube, Google Drive y más, todo en un solo lugar.</p>
-        </div>
-    </section>
-
-    <section class="app-preview" id="preview">
-        <h2 class="preview-title">Una Experiencia Cósmica</h2>
-        <p class="preview-subtitle">Interfaz intuitiva y elegante diseñada para que disfrutes al máximo tus momentos compartidos con amigos y familiares.</p>
-        <div class="preview-image">
-            <div class="device-mockup">
-                <div class="mockup-content"></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="cta">
-        <div class="cta-container">
-            <div class="cta-bg"></div>
-            <h2 class="cta-title">¿Listo para la experiencia cósmica?</h2>
-            <p class="cta-subtitle">Regístrate ahora y comienza a compartir momentos inolvidables con tus amigos desde cualquier lugar del universo.</p>
-            <button class="btn btn-signup btn-hero" id="ctaSignupBtn">Empieza Ahora</button>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="copyright">
-            © 2024 CosmicWave. Todos los derechos reservados.
-        </div>
-    </footer>
-
-    <div class="modal-overlay" id="authModal">
-        <div class="modal">
-            <div class="modal-close" id="closeAuthModal">×</div>
-            <div id="authModalContent"></div>
+    <div class="mobile-header">
+        <div class="logo">SubCode X</div>
+        <div class="mobile-controls">
+            <button class="btn btn-primary" onclick="ejecutarCodigo()">
+                <span>▶️</span>
+            </button>
+            <button class="btn btn-info" onclick="cargarEjemplo()">
+                <span>📖</span>
+            </button>
         </div>
     </div>
+    
+    <div class="container">
+        <!-- Panel del Editor -->
+        <div class="editor-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span>📝</span>
+                    <span>SubCode X Editor</span>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="crearNuevoArchivo()">
+                        <span>📄</span> Nuevo
+                    </button>
+                    <button class="btn btn-info" onclick="cargarEjemplo()">
+                        <span>📖</span> Ejemplo
+                    </button>
+                    <button class="btn btn-primary" onclick="ejecutarCodigo()">
+                        <span>▶️</span> Ejecutar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="file-info">
+                <div><strong>Archivo:</strong> <span id="fileName">programa.subx</span></div>
+                <div><strong>Líneas:</strong> <span id="lineCount">1</span></div>
+                <div><strong>Caracteres:</strong> <span id="charCount">0</span></div>
+            </div>
+            
+            <div class="editor-container">
+                <div class="line-numbers" id="lineNumbers">1</div>
+                <div class="code-container">
+                    <textarea class="code-editor" id="codeEditor" placeholder="# Escribe tu código SubCode X aquí...
+decir &quot;Hola mundo&quot;
+variable nombre = &quot;SubCode X&quot;
+decir &quot;Bienvenido a &quot; + nombre"></textarea>
+                </div>
+            </div>
+        </div>
 
-    <div class="modal-overlay" id="createRoomModal">
-        <div class="modal">
-            <div class="modal-close" id="closeCreateRoomModal">×</div>
-            <h2 class="modal-title">Crear Nueva Sala</h2>
-            <div class="create-room-form">
-                <div class="input-group">
-                    <label class="input-label" for="roomNameInput">Nombre de la Sala</label>
-                    <input type="text" class="input-field" id="roomNameInput" placeholder="Mi sala de cine cósmica">
+        <!-- Panel de Salida -->
+        <div class="output-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span>🖥️</span>
+                    <span>Salida</span>
                 </div>
-                <div class="room-options">
-                    <div class="option-group">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="privateRoomToggle">
-                            <span class="slider"></span>
-                        </label>
-                        <span>Sala Privada (Próximamente)</span>
-                    </div>
-                    <div class="option-group">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="onlyHostControlsToggle">
-                            <span class="slider"></span>
-                        </label>
-                        <span>Solo anfitrión controla reproducción</span>
-                    </div>
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="limpiarSalida()">
+                        <span>🧹</span> Limpiar
+                    </button>
                 </div>
-                <div class="modal-tabs">
-                    <div class="modal-tab active" data-tab="youtube">YouTube</div>
-                    <div class="modal-tab" data-tab="drive">Google Drive</div>
-                    <div class="modal-tab" data-tab="screen" disabled>Pantalla</div>
-                </div>
-                <div class="modal-tab-content active" id="youtube-tab">
-                    <div class="url-input-container">
-                        <div class="url-type-selector">YouTube</div>
-                        <input type="text" class="media-input" id="youtubeUrlInput" placeholder="Pega un enlace de YouTube">
-                    </div>
-                </div>
-                <div class="modal-tab-content" id="drive-tab">
-                    <div class="url-input-container">
-                        <div class="url-type-selector">Drive</div>
-                        <input type="text" class="media-input" id="driveUrlInput" placeholder="Pega enlace directo de Google Drive">
-                    </div>
-                    <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 5px;">Nota: Requiere enlace directo al video.</p>
-                </div>
-                <div class="modal-tab-content" id="screen-tab">
-                    <p style="text-align: center; color: rgba(255,255,255,0.7);">Compartir pantalla estará disponible pronto.</p>
-                </div>
-                <p class="error-message" id="createRoomError"></p>
-                <button class="btn btn-signup btn-modal" id="createRoomConfirmBtn">Crear Sala</button>
+            </div>
+
+            <div class="syntax-help">
+                <h4>🎯 Sintaxis SubCode X</h4>
+                <div><code>decir "texto"</code> - Mostrar texto</div>
+                <div><code>variable nombre = "valor"</code> - Crear variable</div>
+                <div><code>si condicion entonces accion</code> - Condicional</div>
+                <div><code>repetir N veces accion</code> - Bucle</div>
+                <div><code>funcion nombre() ... finfuncion</code> - Función</div>
+                <div><code>esperar N</code> - Pausar N segundos</div>
+            </div>
+
+            <div class="output-container" id="outputContainer">
+                <div class="output-line output-success">✅ SubCode X Editor listo</div>
+                <div class="output-line">💡 Escribe tu código y presiona "Ejecutar"</div>
             </div>
         </div>
     </div>
-
-    <div class="modal-overlay" id="joinRoomModal">
-        <div class="modal">
-            <div class="modal-close" id="closeJoinRoomModal">×</div>
-            <h2 class="modal-title">Unirse a Sala</h2>
-            <div class="input-group">
-                <label class="input-label" for="roomCodeInput">Código de la sala</label>
-                <input type="text" class="input-field" id="roomCodeInput" placeholder="Ingresa el código" maxlength="6">
-            </div>
-            <p class="error-message" id="joinRoomError"></p>
-            <button class="btn btn-signup btn-modal" id="joinRoomConfirmBtn">Unirse</button>
-        </div>
+    
+    <div class="mobile-indicator">
+        <span>📱</span> Modo Móvil
     </div>
 
-    <div class="room-container" id="roomContainer">
-        <div class="room-header">
-            <div class="room-title">
-                <span id="currentRoomName">Cargando...</span>
-                <span class="room-id" id="roomIdDisplay" title="Copiar ID de Sala">ID: ------</span>
-            </div>
-            <div class="room-actions">
-                <button class="btn btn-invite" id="inviteBtn">Invitar (Copiar ID)</button>
-                <button class="btn btn-leave" id="leaveRoomBtn">Salir de la Sala</button>
-            </div>
-        </div>
-        <div class="room-content">
-            <div class="player-wrapper" id="playerWrapper">
-                <div id="youtubePlayer"></div>
-                <video id="html5Player" controlslist="nodownload noremoteplayback" disablepictureinpicture></video>
-                <div class="player-controls" id="playerControls">
-                    <button class="control-btn" id="playPauseBtn" title="Reproducir/Pausar">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7L8 5z"/> </svg>
-                    </button>
-                    <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
-                    <div class="timeline" id="videoTimeline" title="Buscar en video">
-                        <div class="timeline-progress" id="timelineProgress"></div>
-                        <div class="timeline-handle" id="timelineHandle"></div>
-                    </div>
-                    <div class="volume-control">
-                        <button class="control-btn" id="muteBtn" title="Silenciar/Activar Sonido">
-                            <svg viewBox="0 0 24 24" id="muteIcon"> <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                            </svg>
-                        </button>
-                        <div class="volume-slider" id="volumeSlider" title="Control de Volumen">
-                            <div class="volume-level" id="volumeLevel"></div>
-                        </div>
-                    </div>
-                    <button class="control-btn" id="micBtn" title="Activar/Desactivar Micrófono (Próximamente)">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/>
-                        </svg>
-                    </button>
-                    <button class="control-btn" id="cameraBtn" title="Activar/Desactivar Cámara (Próximamente)">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z"/>
-                        </svg>
-                    </button>
-                    <button class="control-btn" id="screenShareBtn" disabled title="Compartir Pantalla (Próximamente)">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H1c-.55 0-1 .45-1 1s.45 1 1 1h22c.55 0 1-.45 1-1s-.45-1-1-1h-3zm-7-3.53v-2.19c-2.78 0-4.61.85-6 2.72.56-2.67 2.11-5.33 6-5.87V7l4 3.73-4 3.74z"/>
-                        </svg>
-                    </button>
-                    <button class="control-btn" id="fullscreenBtn" title="Pantalla Completa">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <div class="chat-container">
-                <div class="chat-header">Chat de la Sala</div>
-                <div class="chat-messages-container" id="chatMessages">
-                    <div class="message received">
-                        <div class="message-user">Sistema</div>
-                        <div class="message-text">¡Bienvenido! Los mensajes aparecerán aquí.</div>
-                    </div>
-                </div>
-                <div class="chat-input-container">
-                    <input type="text" class="chat-input-field" id="chatInput" placeholder="Escribe tu mensaje..." maxlength="500">
-                    <button class="btn-send" id="sendMessageBtn" disabled>Enviar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script>
+        const editor = document.getElementById('codeEditor');
+        const lineNumbers = document.getElementById('lineNumbers');
+        const outputContainer = document.getElementById('outputContainer');
+        const fileNameSpan = document.getElementById('fileName');
+        const lineCountSpan = document.getElementById('lineCount');
+        const charCountSpan = document.getElementById('charCount');
 
-    <div id="notificationContainer" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000;"></div>
+        // Intérprete SubCode X en JavaScript
+        class SubCodeXInterpreter {
+            constructor() {
+                this.variables = {};
+                this.funciones = {};
+                this.enFuncion = null;
+                this.output = [];
+            }
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script type="module" src="script.js"></script>
+            interpretar(codigo) {
+                this.output = [];
+                this.variables = {};
+                this.funciones = {};
+                this.enFuncion = null;
+
+                const lineas = codigo.split('\n');
+                
+                for (let i = 0; i < lineas.length; i++) {
+                    const linea = lineas[i].trim();
+                    if (linea && !linea.startsWith('#')) {
+                        try {
+                            this.interpretarLinea(linea);
+                        } catch (error) {
+                            this.output.push({
+                                type: 'error',
+                                message: `Error en línea ${i + 1}: ${error.message}`
+                            });
+                        }
+                    }
+                }
+
+                return this.output;
+            }
+
+            interpretarLinea(linea) {
+                // Función en definición
+                if (this.enFuncion) {
+                    if (linea === 'finfuncion') {
+                        this.enFuncion = null;
+                    } else {
+                        this.funciones[this.enFuncion].push(linea);
+                    }
+                    return;
+                }
+
+                // Comando: decir
+                if (linea.startsWith('decir ')) {
+                    const contenido = linea.substring(6).trim();
+                    const resultado = this.evaluarExpresion(contenido);
+                    this.output.push({
+                        type: 'output',
+                        message: resultado
+                    });
+                }
+
+                // Comando: variable
+                else if (linea.startsWith('variable ')) {
+                    const partes = linea.substring(9).split('=');
+                    if (partes.length === 2) {
+                        const nombre = partes[0].trim();
+                        const valor = this.evaluarExpresion(partes[1].trim());
+                        this.variables[nombre] = valor;
+                        this.output.push({
+                            type: 'debug',
+                            message: `Variable '${nombre}' = '${valor}'`
+                        });
+                    }
+                }
+
+                // Comando: si
+                else if (linea.startsWith('si ')) {
+                    const partes = linea.substring(3).split(' entonces ');
+                    if (partes.length === 2) {
+                        const condicion = partes[0].trim();
+                        const accion = partes[1].trim();
+                        
+                        if (this.evaluarCondicion(condicion)) {
+                            this.interpretarLinea(accion);
+                        }
+                    }
+                }
+
+                // Comando: repetir
+                else if (linea.startsWith('repetir ')) {
+                    const partes = linea.split(' veces ');
+                    if (partes.length === 2) {
+                        const veces = parseInt(this.evaluarExpresion(partes[0].replace('repetir', '').trim()));
+                        const accion = partes[1].trim();
+                        
+                        for (let i = 0; i < veces; i++) {
+                            this.interpretarLinea(accion);
+                        }
+                    }
+                }
+
+                // Comando: funcion
+                else if (linea.startsWith('funcion ')) {
+                    const nombre = linea.substring(8).replace('()', '').trim();
+                    this.funciones[nombre] = [];
+                    this.enFuncion = nombre;
+                    this.output.push({
+                        type: 'debug',
+                        message: `Definiendo función '${nombre}'`
+                    });
+                }
+
+                // Llamada a función
+                else if (linea.replace('()', '') in this.funciones) {
+                    const nombreFuncion = linea.replace('()', '');
+                    for (const lineaFuncion of this.funciones[nombreFuncion]) {
+                        this.interpretarLinea(lineaFuncion);
+                    }
+                }
+
+                // Comando: esperar (simulado)
+                else if (linea.startsWith('esperar ')) {
+                    const tiempo = this.evaluarExpresion(linea.substring(8).trim());
+                    this.output.push({
+                        type: 'debug',
+                        message: `Esperando ${tiempo} segundos...`
+                    });
+                }
+            }
+
+            evaluarExpresion(expr) {
+                if (!expr) return '';
+
+                // Cadena entre comillas
+                if (expr.startsWith('"') && expr.endsWith('"')) {
+                    return expr.slice(1, -1);
+                }
+
+                // Variable
+                if (expr in this.variables) {
+                    return this.variables[expr];
+                }
+
+                // Número
+                if (!isNaN(expr)) {
+                    return expr;
+                }
+
+                // Expresión con concatenación
+                let resultado = '';
+                const tokens = this.tokenizar(expr);
+                
+                for (const token of tokens) {
+                    if (token === '+') continue;
+                    
+                    if (token.startsWith('"') && token.endsWith('"')) {
+                        resultado += token.slice(1, -1);
+                    } else if (token in this.variables) {
+                        resultado += this.variables[token];
+                    } else if (!isNaN(token)) {
+                        resultado += token;
+                    } else {
+                        resultado += token;
+                    }
+                }
+
+                return resultado;
+            }
+
+            tokenizar(expr) {
+                const tokens = [];
+                let i = 0;
+                let tokenActual = '';
+
+                while (i < expr.length) {
+                    const char = expr[i];
+
+                    if (char === '"') {
+                        if (tokenActual) {
+                            tokens.push(tokenActual.trim());
+                            tokenActual = '';
+                        }
+
+                        let cadena = '"';
+                        i++;
+                        while (i < expr.length && expr[i] !== '"') {
+                            cadena += expr[i];
+                            i++;
+                        }
+                        if (i < expr.length) {
+                            cadena += '"';
+                        }
+                        tokens.push(cadena);
+                    } else if (char === '+') {
+                        if (tokenActual) {
+                            tokens.push(tokenActual.trim());
+                            tokenActual = '';
+                        }
+                        tokens.push('+');
+                    } else if (char === ' ') {
+                        if (tokenActual) {
+                            tokens.push(tokenActual.trim());
+                            tokenActual = '';
+                        }
+                    } else {
+                        tokenActual += char;
+                    }
+
+                    i++;
+                }
+
+                if (tokenActual) {
+                    tokens.push(tokenActual.trim());
+                }
+
+                return tokens.filter(t => t);
+            }
+
+            evaluarCondicion(cond) {
+                if (cond.includes('==')) {
+                    const [a, b] = cond.split('==');
+                    return this.evaluarExpresion(a.trim()) === this.evaluarExpresion(b.trim());
+                }
+                if (cond.includes('!=')) {
+                    const [a, b] = cond.split('!=');
+                    return this.evaluarExpresion(a.trim()) !== this.evaluarExpresion(b.trim());
+                }
+                return false;
+            }
+        }
+
+        const interprete = new SubCodeXInterpreter();
+
+        // Actualizar números de línea
+        function actualizarLineas() {
+            const lineas = editor.value.split('\n');
+            const numeroLineas = lineas.length;
+            
+            lineNumbers.innerHTML = '';
+            for (let i = 1; i <= numeroLineas; i++) {
+                lineNumbers.innerHTML += i + '\n';
+            }
+            
+            lineCountSpan.textContent = numeroLineas;
+            charCountSpan.textContent = editor.value.length;
+        }
+
+        // Resaltado de sintaxis
+        function aplicarResaltado() {
+            const codigo = editor.value;
+            // El resaltado se aplica visualmente con CSS
+            actualizarLineas();
+        }
+
+        // Ejecutar código
+        function ejecutarCodigo() {
+            const codigo = editor.value;
+            if (!codigo.trim()) {
+                mostrarOutput([{
+                    type: 'error',
+                    message: '❌ No hay código para ejecutar'
+                }]);
+                return;
+            }
+
+            mostrarOutput([{
+                type: 'debug',
+                message: '🚀 Ejecutando código...'
+            }]);
+
+            setTimeout(() => {
+                const resultado = interprete.interpretar(codigo);
+                mostrarOutput(resultado);
+            }, 100);
+        }
+
+        // Mostrar salida
+        function mostrarOutput(output) {
+            outputContainer.innerHTML = '';
+            
+            if (output.length === 0) {
+                outputContainer.innerHTML = '<div class="output-line output-success">✅ Código ejecutado sin salida</div>';
+                return;
+            }
+
+            output.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'output-line';
+                
+                switch (item.type) {
+                    case 'error':
+                        div.className += ' output-error';
+                        div.textContent = item.message;
+                        break;
+                    case 'debug':
+                        div.className += ' output-debug';
+                        div.textContent = `🐛 ${item.message}`;
+                        break;
+                    case 'output':
+                    default:
+                        div.className += ' output-success';
+                        div.textContent = item.message;
+                        break;
+                }
+                
+                outputContainer.appendChild(div);
+            });
+            
+            outputContainer.scrollTop = outputContainer.scrollHeight;
+        }
+
+        // Limpiar salida
+        function limpiarSalida() {
+            outputContainer.innerHTML = '<div class="output-line output-success">✅ Salida limpiada</div>';
+        }
+
+        // Crear nuevo archivo
+        function crearNuevoArchivo() {
+            editor.value = '';
+            fileNameSpan.textContent = 'programa.subx';
+            actualizarLineas();
+            mostrarOutput([{
+                type: 'success',
+                message: '📄 Nuevo archivo creado'
+            }]);
+        }
+
+        // Cargar ejemplo
+        function cargarEjemplo() {
+            const ejemplo = `# SubCode X - Programa de Ejemplo
+# Demostrando las funcionalidades del lenguaje
+
+decir "🚀 Bienvenido a SubCode X"
+decir "=========================="
+
+# Variables
+variable nombre = "Programador"
+variable lenguaje = "SubCode X"
+variable version = "1.0"
+
+# Mostrar información
+decir "Hola " + nombre
+decir "Estás usando " + lenguaje + " v" + version
+
+# Condicionales
+si nombre == "Programador" entonces decir "✅ Usuario reconocido"
+si version == "1.0" entonces decir "✅ Versión correcta"
+
+# Bucles
+decir "Contando hasta 3:"
+repetir 3 veces decir "Número procesado"
+
+# Funciones
+funcion saludar()
+decir "¡Hola desde una función!"
+decir "SubCode X es genial"
+finfuncion
+
+funcion despedida()
+decir "Gracias por usar SubCode X"
+decir "¡Hasta la próxima!"
+finfuncion
+
+# Ejecutar funciones
+saludar()
+esperar 1
+despedida()
+
+decir "🎯 Programa completado"`;
+
+            editor.value = ejemplo;
+            fileNameSpan.textContent = 'ejemplo.subx';
+            actualizarLineas();
+            mostrarOutput([{
+                type: 'success',
+                message: '📖 Ejemplo cargado'
+            }]);
+        }
+
+        // Event listeners
+        editor.addEventListener('input', aplicarResaltado);
+        editor.addEventListener('scroll', () => {
+            lineNumbers.scrollTop = editor.scrollTop;
+        });
+
+        // Atajos de teclado
+        editor.addEventListener('keydown', (e) => {
+            // Ctrl+Enter para ejecutar
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                ejecutarCodigo();
+            }
+            
+            // Tab para indentación
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                editor.value = editor.value.substring(0, start) + '    ' + editor.value.substring(end);
+                editor.selectionStart = editor.selectionEnd = start + 4;
+                aplicarResaltado();
+            }
+        });
+
+        // Inicializar
+        actualizarLineas();
+        cargarEjemplo();
+    </script>
 </body>
-    </html>
+</html>
