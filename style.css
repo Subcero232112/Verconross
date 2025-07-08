@@ -96,21 +96,23 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-height: 0;
     gap: 10px;
 }
 
 .tabs-container {
     background: rgba(0, 0, 0, 0.8);
-    border-radius: 12px;
+    border-radius: 12px 12px 0 0;
     padding: 10px;
     border: 1px solid rgba(255, 0, 0, 0.3);
+    border-bottom: none;
     display: flex;
     overflow-x: auto;
 }
 
 .tab {
     padding: 8px 15px;
-    border-radius: 8px;
+    border-radius: 6px 6px 0 0;
     background: rgba(139, 0, 0, 0.3);
     cursor: pointer;
     display: flex;
@@ -118,6 +120,8 @@ body {
     gap: 8px;
     margin-right: 5px;
     white-space: nowrap;
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    border-bottom: none;
 }
 
 .tab.active {
@@ -141,16 +145,31 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
-.editor-panel {
+.panel-container {
+    display: flex;
     flex: 1;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 15px;
-    border: 1px solid rgba(255, 0, 0, 0.3);
+    min-height: 0;
+    gap: 10px;
+}
+
+.panel-column {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 50vh;
+    min-height: 0;
+    gap: 10px;
+}
+
+.editor-panel, .output-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 12px 12px;
+    padding: 15px;
+    border: 1px solid rgba(255, 0, 0, 0.3);
 }
 
 .panel-header {
@@ -234,6 +253,7 @@ body {
     overflow: hidden;
     background: #0a0a0a;
     display: flex;
+    min-height: 0;
 }
 
 .line-numbers {
@@ -273,18 +293,14 @@ body {
 
 /* Panel de salida */
 .output-panel {
-    height: 250px;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 15px;
-    border: 1px solid rgba(255, 0, 0, 0.3);
+    height: auto;
     display: flex;
     flex-direction: column;
 }
 
 .output-container {
     flex: 1;
+    min-height: 0;
     background: #0d0d0d;
     border-radius: 8px;
     padding: 12px;
@@ -342,49 +358,15 @@ body {
     margin: 3px 0;
 }
 
-/* Resaltado de sintaxis */
-.keyword {
-    color: #ff5555;
-    font-weight: bold;
-}
-
-.string {
-    color: #ffaa55;
-}
-
-.comment {
-    color: #99aa77;
-    font-style: italic;
-}
-
-.variable {
-    color: #ff77cc;
-}
-
-.function {
-    color: #ffff55;
-}
-
-.number {
-    color: #55ff55;
-}
-
-.operator {
-    color: #ff9999;
-}
-
-.web-keyword {
-    color: #55aaff;
-}
-
 /* Previsualización web */
 .web-preview {
     flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
     background: white;
     border-radius: 8px;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
 }
 
 .preview-header {
@@ -400,6 +382,7 @@ body {
 .preview-iframe {
     flex: 1;
     border: none;
+    min-height: 0;
 }
 
 /* Scrollbar styling */
@@ -424,13 +407,13 @@ body {
 
 /* Barra de estado */
 .status-bar {
-    background: rgba(0, 0, 0, 0.8);
+    background: #007acc;
     padding: 5px 15px;
     display: flex;
     justify-content: space-between;
     font-size: 12px;
-    color: #ff9999;
-    border-top: 1px solid rgba(255, 0, 0, 0.3);
+    color: white;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Adaptación móvil */
@@ -444,8 +427,81 @@ body {
         max-height: 200px;
     }
     
+    .panel-container {
+        flex-direction: column;
+    }
+    
     .main-content {
         min-height: 70vh;
     }
 }
 
+/* Mejoras específicas para la consola */
+.output-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 0 0 12px 12px;
+    padding: 0;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.output-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.output-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.output-container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    background: #1e1e1e;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #e0e0e0;
+}
+
+.output-line {
+    margin-bottom: 6px;
+    padding: 4px 8px;
+    word-break: break-word;
+    white-space: pre-wrap;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.output-line:last-child {
+    margin-bottom: 0;
+}
+
+/* [Mantén todo el CSS anterior igual] */
+
+/* Añade estas nuevas reglas al final */
+.syntax-subx-css {
+    color: #55aaff;
+    font-weight: bold;
+}
+
+.syntax-subx-css-property {
+    color: #ff77cc;
+}
+
+.syntax-subx-css-value {
+    color: #55ff55;
+}
+
+.syntax-subx-css-string {
+    color: #ffaa55;
+}
