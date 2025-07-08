@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SubCode X - Editor</title>
+    <title>SubCode X - Entorno de Desarrollo</title>
     <style>
         * {
             margin: 0;
@@ -21,24 +21,136 @@
 
         .container {
             display: flex;
-            flex-direction: column;
             min-height: 100vh;
-            padding: 15px;
-            gap: 15px;
+            gap: 10px;
+            padding: 10px;
         }
 
         @media (min-width: 768px) {
             .container {
-                flex-direction: row;
-                height: 100vh;
-                padding: 20px;
-                gap: 20px;
+                padding: 15px;
+                gap: 15px;
             }
+        }
+
+        /* Barra lateral */
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .sidebar-title {
+            color: #ff5555;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .file-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .file-tree {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .file-item:hover {
+            background: rgba(139, 0, 0, 0.3);
+        }
+
+        .file-item.active {
+            background: rgba(139, 0, 0, 0.5);
+            border-left: 3px solid #ff5555;
+        }
+
+        .file-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Editor principal */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tabs-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(139, 0, 0, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 5px;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: rgba(139, 0, 0, 0.7);
+            border-bottom: 2px solid #ff5555;
+        }
+
+        .tab-close {
+            margin-left: 5px;
+            padding: 2px;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .tab-close:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .editor-panel {
             flex: 1;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 15px;
@@ -46,13 +158,6 @@
             display: flex;
             flex-direction: column;
             min-height: 50vh;
-        }
-
-        @media (min-width: 768px) {
-            .editor-panel {
-                min-height: auto;
-                padding: 20px;
-            }
         }
 
         .panel-header {
@@ -173,23 +278,16 @@
             overflow-wrap: normal;
         }
 
+        /* Panel de salida */
         .output-panel {
-            flex: 0 0 auto;
-            background: rgba(0, 0, 0, 0.7);
+            height: 250px;
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 15px;
             border: 1px solid rgba(255, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
-            max-height: 40vh;
-        }
-
-        @media (min-width: 768px) {
-            .output-panel {
-                flex: 0 0 400px;
-                max-height: none;
-            }
         }
 
         .output-container {
@@ -282,30 +380,33 @@
             color: #ff9999;
         }
 
-        .mobile-header {
+        .web-keyword {
+            color: #55aaff;
+        }
+
+        /* Previsualización web */
+        .web-preview {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            background: #222;
+            padding: 8px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.8);
-            border-bottom: 1px solid #ff000055;
+            color: #ddd;
+            font-size: 14px;
         }
 
-        .logo {
-            font-weight: bold;
-            color: #ff5555;
-            font-size: 18px;
-        }
-
-        .mobile-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        @media (min-width: 768px) {
-            .mobile-header {
-                display: none;
-            }
+        .preview-iframe {
+            flex: 1;
+            border: none;
         }
 
         /* Scrollbar styling */
@@ -328,130 +429,293 @@
             background: #ff0000;
         }
 
-        .mobile-indicator {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(139, 0, 0, 0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 100;
+        /* Barra de estado */
+        .status-bar {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 5px 15px;
             display: flex;
-            align-items: center;
-            gap: 5px;
-            backdrop-filter: blur(5px);
+            justify-content: space-between;
+            font-size: 12px;
+            color: #ff9999;
+            border-top: 1px solid rgba(255, 0, 0, 0.3);
         }
 
-        @media (min-width: 768px) {
-            .mobile-indicator {
-                display: none;
+        /* Adaptación móvil */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+            
+            .main-content {
+                min-height: 70vh;
             }
         }
     </style>
 </head>
 <body>
-    <div class="mobile-header">
-        <div class="logo">SubCode X</div>
-        <div class="mobile-controls">
-            <button class="btn btn-primary" onclick="ejecutarCodigo()">
-                <span>▶️</span>
-            </button>
-            <button class="btn btn-info" onclick="cargarEjemplo()">
-                <span>📖</span>
-            </button>
-        </div>
-    </div>
-    
     <div class="container">
-        <!-- Panel del Editor -->
-        <div class="editor-panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <span>📝</span>
-                    <span>SubCode X Editor</span>
+        <!-- Barra lateral de archivos -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <span>📁</span>
+                    <span>Explorador de Archivos</span>
                 </div>
-                <div class="controls">
+                <div class="file-controls">
                     <button class="btn btn-secondary" onclick="crearNuevoArchivo()">
-                        <span>📄</span> Nuevo
+                        <span>📄</span> Nuevo Archivo
                     </button>
-                    <button class="btn btn-info" onclick="cargarEjemplo()">
-                        <span>📖</span> Ejemplo
+                    <button class="btn btn-secondary" onclick="crearNuevaCarpeta()">
+                        <span>📁</span> Nueva Carpeta
                     </button>
-                    <button class="btn btn-primary" onclick="ejecutarCodigo()">
-                        <span>▶️</span> Ejecutar
+                    <button class="btn btn-info" onclick="guardarTodo()">
+                        <span>💾</span> Guardar Todo
                     </button>
                 </div>
             </div>
             
-            <div class="file-info">
-                <div><strong>Archivo:</strong> <span id="fileName">programa.subx</span></div>
-                <div><strong>Líneas:</strong> <span id="lineCount">1</span></div>
-                <div><strong>Caracteres:</strong> <span id="charCount">0</span></div>
-            </div>
-            
-            <div class="editor-container">
-                <div class="line-numbers" id="lineNumbers">1</div>
-                <div class="code-container">
-                    <textarea class="code-editor" id="codeEditor" placeholder="# Escribe tu código SubCode X aquí...
-decir &quot;Hola mundo&quot;
-variable nombre = &quot;SubCode X&quot;
-decir &quot;Bienvenido a &quot; + nombre"></textarea>
-                </div>
+            <div class="file-tree" id="fileTree">
+                <!-- Los archivos se generarán dinámicamente -->
             </div>
         </div>
-
-        <!-- Panel de Salida -->
-        <div class="output-panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <span>🖥️</span>
-                    <span>Salida</span>
+        
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <!-- Pestañas de archivos -->
+            <div class="tabs-container" id="tabsContainer">
+                <!-- Las pestañas se generarán dinámicamente -->
+            </div>
+            
+            <!-- Panel del Editor -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>📝</span>
+                        <span id="currentFileName">programa.subx</span>
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-info" onclick="cargarEjemplo()">
+                            <span>📖</span> Ejemplo
+                        </button>
+                        <button class="btn btn-primary" onclick="ejecutarCodigo()">
+                            <span>▶️</span> Ejecutar
+                        </button>
+                        <button class="btn btn-secondary" onclick="guardarArchivo()">
+                            <span>💾</span> Guardar
+                        </button>
+                    </div>
                 </div>
-                <div class="controls">
-                    <button class="btn btn-secondary" onclick="limpiarSalida()">
-                        <span>🧹</span> Limpiar
-                    </button>
+                
+                <div class="file-info">
+                    <div><strong>Tipo:</strong> <span id="fileType">SubCode X</span></div>
+                    <div><strong>Líneas:</strong> <span id="lineCount">1</span></div>
+                    <div><strong>Caracteres:</strong> <span id="charCount">0</span></div>
+                    <div><strong>Historial:</strong> <button class="btn" onclick="deshacer()">↩️ Deshacer</button> <button class="btn" onclick="rehacer()">↪️ Rehacer</button></div>
+                </div>
+                
+                <div class="editor-container">
+                    <div class="line-numbers" id="lineNumbers">1</div>
+                    <div class="code-container">
+                        <textarea class="code-editor" id="codeEditor" placeholder="# Escribe tu código SubCode X aquí..."></textarea>
+                    </div>
                 </div>
             </div>
-
-            <div class="syntax-help">
-                <h4>🎯 Sintaxis SubCode X</h4>
-                <div><code>decir "texto"</code> - Mostrar texto</div>
-                <div><code>variable nombre = "valor"</code> - Crear variable</div>
-                <div><code>si condicion entonces accion</code> - Condicional</div>
-                <div><code>repetir N veces accion</code> - Bucle</div>
-                <div><code>funcion nombre() ... finfuncion</code> - Función</div>
-                <div><code>esperar N</code> - Pausar N segundos</div>
+            
+            <!-- Panel de Previsualización Web -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>🌐</span>
+                        <span>Previsualización Web</span>
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="actualizarPreview()">
+                            <span>🔄</span> Actualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="web-preview">
+                    <div class="preview-header">
+                        <div>Previsualización</div>
+                        <div id="previewInfo">index.html</div>
+                    </div>
+                    <iframe class="preview-iframe" id="webPreview"></iframe>
+                </div>
             </div>
+            
+            <!-- Panel de Salida -->
+            <div class="output-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>🖥️</span>
+                        <span>Salida y Consola</span>
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-secondary" onclick="limpiarSalida()">
+                            <span>🧹</span> Limpiar
+                        </button>
+                    </div>
+                </div>
 
-            <div class="output-container" id="outputContainer">
-                <div class="output-line output-success">✅ SubCode X Editor listo</div>
-                <div class="output-line">💡 Escribe tu código y presiona "Ejecutar"</div>
+                <div class="syntax-help">
+                    <h4>🎯 Nuevos Comandos Web</h4>
+                    <div><code>pagina "index.html"</code> - Crear página web</div>
+                    <div><code>titulo "Mi Página"</code> - Establecer título</div>
+                    <div><code>estilo "body { color: red; }"</code> - Agregar CSS</div>
+                    <div><code>elemento "h1" "Hola Mundo"</code> - Crear elemento</div>
+                    <div><code>consola "Mensaje"</code> - Mostrar en consola</div>
+                </div>
+
+                <div class="output-container" id="outputContainer">
+                    <div class="output-line output-success">✅ SubCode X Editor listo</div>
+                    <div class="output-line">💡 Escribe tu código y presiona "Ejecutar"</div>
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="mobile-indicator">
-        <span>📱</span> Modo Móvil
+    <div class="status-bar">
+        <div>SubCode X v2.0</div>
+        <div id="statusMessage">Listo</div>
     </div>
 
     <script>
+        // Sistema de archivos virtual
+        const fileSystem = {
+            root: {
+                name: 'Proyecto',
+                type: 'folder',
+                children: [
+                    {
+                        name: 'index.html',
+                        type: 'file',
+                        content: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Mi Página</title>
+</head>
+<body>
+    <h1>Bienvenido a SubCode X</h1>
+</body>
+</html>`,
+                        language: 'html'
+                    },
+                    {
+                        name: 'estilos.css',
+                        type: 'file',
+                        content: `body {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}`,
+                        language: 'css'
+                    },
+                    {
+                        name: 'script.subx',
+                        type: 'file',
+                        content: `# Programa de ejemplo
+decir "Hola desde SubCode X"
+variable nombre = "Visitante"
+decir "Bienvenido " + nombre
+
+# Crear página web
+pagina "index.html"
+titulo "Mi Página Web"
+estilo "body { background: #222; color: white; }"
+elemento "h1" "Bienvenido a SubCode X"
+elemento "p" "Esta página fue creada con SubCode X"
+consola "Página generada correctamente"`,
+                        language: 'subx'
+                    },
+                    {
+                        name: 'carpeta-1',
+                        type: 'folder',
+                        children: []
+                    }
+                ]
+            },
+            currentFile: null,
+            openTabs: [],
+            history: {},
+            historyIndex: {}
+        };
+
         const editor = document.getElementById('codeEditor');
         const lineNumbers = document.getElementById('lineNumbers');
         const outputContainer = document.getElementById('outputContainer');
-        const fileNameSpan = document.getElementById('fileName');
         const lineCountSpan = document.getElementById('lineCount');
         const charCountSpan = document.getElementById('charCount');
+        const fileTypeSpan = document.getElementById('fileType');
+        const currentFileNameSpan = document.getElementById('currentFileName');
+        const fileTree = document.getElementById('fileTree');
+        const tabsContainer = document.getElementById('tabsContainer');
+        const webPreview = document.getElementById('webPreview');
+        const previewInfo = document.getElementById('previewInfo');
+        const statusMessage = document.getElementById('statusMessage');
 
-        // Intérprete SubCode X en JavaScript
+        // Historial de edición
+        const editHistory = {
+            current: {},
+            stack: [],
+            index: -1,
+            
+            saveState: function(filePath, content) {
+                if (!this.stack[filePath]) {
+                    this.stack[filePath] = [];
+                    this.index[filePath] = -1;
+                }
+                
+                // Eliminar estados futuros si estamos en medio del historial
+                if (this.index[filePath] < this.stack[filePath].length - 1) {
+                    this.stack[filePath] = this.stack[filePath].slice(0, this.index[filePath] + 1);
+                }
+                
+                // Guardar nuevo estado
+                this.stack[filePath].push(content);
+                this.index[filePath] = this.stack[filePath].length - 1;
+            },
+            
+            undo: function(filePath) {
+                if (!this.stack[filePath] || this.index[filePath] <= 0) return null;
+                
+                this.index[filePath]--;
+                return this.stack[filePath][this.index[filePath]];
+            },
+            
+            redo: function(filePath) {
+                if (!this.stack[filePath] || this.index[filePath] >= this.stack[filePath].length - 1) return null;
+                
+                this.index[filePath]++;
+                return this.stack[filePath][this.index[filePath]];
+            },
+            
+            canUndo: function(filePath) {
+                return this.stack[filePath] && this.index[filePath] > 0;
+            },
+            
+            canRedo: function(filePath) {
+                return this.stack[filePath] && this.index[filePath] < this.stack[filePath].length - 1;
+            }
+        };
+
+        // Intérprete SubCode X extendido para crear webs
         class SubCodeXInterpreter {
             constructor() {
                 this.variables = {};
                 this.funciones = {};
                 this.enFuncion = null;
                 this.output = [];
+                this.web = {
+                    html: '',
+                    css: '',
+                    js: '',
+                    title: 'Página SubCode X'
+                };
             }
 
             interpretar(codigo) {
@@ -459,6 +723,7 @@ decir &quot;Bienvenido a &quot; + nombre"></textarea>
                 this.variables = {};
                 this.funciones = {};
                 this.enFuncion = null;
+                this.resetWeb();
 
                 const lineas = codigo.split('\n');
                 
@@ -477,6 +742,15 @@ decir &quot;Bienvenido a &quot; + nombre"></textarea>
                 }
 
                 return this.output;
+            }
+            
+            resetWeb() {
+                this.web = {
+                    html: '',
+                    css: '',
+                    js: '',
+                    title: 'Página SubCode X'
+                };
             }
 
             interpretarLinea(linea) {
@@ -567,6 +841,75 @@ decir &quot;Bienvenido a &quot; + nombre"></textarea>
                         message: `Esperando ${tiempo} segundos...`
                     });
                 }
+                
+                // Comandos para crear webs
+                else if (linea.startsWith('pagina ')) {
+                    const nombre = linea.substring(7).trim().replace(/"/g, '');
+                    this.output.push({
+                        type: 'debug',
+                        message: `🔄 Creando página web: ${nombre}`
+                    });
+                }
+                
+                else if (linea.startsWith('titulo ')) {
+                    const titulo = linea.substring(7).trim().replace(/"/g, '');
+                    this.web.title = titulo;
+                    this.output.push({
+                        type: 'debug',
+                        message: `🏷️ Título establecido: ${titulo}`
+                    });
+                }
+                
+                else if (linea.startsWith('estilo ')) {
+                    const estilo = linea.substring(7).trim().replace(/"/g, '');
+                    this.web.css += estilo + '\n';
+                    this.output.push({
+                        type: 'debug',
+                        message: `🎨 Estilo CSS agregado`
+                    });
+                }
+                
+                else if (linea.startsWith('elemento ')) {
+                    const partes = linea.substring(9).trim().split('" "');
+                    if (partes.length >= 2) {
+                        const tag = partes[0].replace(/"/g, '').trim();
+                        let contenido = partes[1].replace(/"/g, '').trim();
+                        
+                        // Reemplazar variables en el contenido
+                        for (const [key, value] of Object.entries(this.variables)) {
+                            contenido = contenido.replace(new RegExp(`\\b${key}\\b`, 'g'), value);
+                        }
+                        
+                        this.web.html += `<${tag}>${contenido}</${tag}>\n`;
+                        this.output.push({
+                            type: 'debug',
+                            message: `📝 Elemento HTML agregado: <${tag}>`
+                        });
+                    }
+                }
+                
+                else if (linea.startsWith('consola ')) {
+                    const mensaje = linea.substring(8).trim().replace(/"/g, '');
+                    this.output.push({
+                        type: 'output',
+                        message: `📢 Consola: ${mensaje}`
+                    });
+                }
+            }
+
+            generarHTML() {
+                return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${this.web.title}</title>
+    <style>${this.web.css}</style>
+    <script>${this.web.js}</script>
+</head>
+<body>
+    ${this.web.html}
+</body>
+</html>`;
             }
 
             evaluarExpresion(expr) {
@@ -672,6 +1015,251 @@ decir &quot;Bienvenido a &quot; + nombre"></textarea>
 
         const interprete = new SubCodeXInterpreter();
 
+        // Inicializar sistema de archivos
+        function initFileSystem() {
+            renderFileTree(fileSystem.root, fileTree);
+            openFile(fileSystem.root.children[0]); // Abrir el primer archivo
+        }
+
+        // Renderizar árbol de archivos
+        function renderFileTree(node, container) {
+            container.innerHTML = '';
+            renderFileNode(node, container, '');
+        }
+
+        function renderFileNode(node, container, indent) {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.dataset.path = node.name;
+            
+            if (fileSystem.currentFile === node) {
+                div.classList.add('active');
+            }
+            
+            div.innerHTML = `
+                <div class="file-icon">${node.type === 'folder' ? '📁' : getFileIcon(node.name)}</div>
+                <div>${node.name}</div>
+            `;
+            
+            div.addEventListener('click', () => {
+                if (node.type === 'folder') {
+                    // Alternar visibilidad de la carpeta
+                    const wasOpen = node.open;
+                    closeAllFolders();
+                    node.open = !wasOpen;
+                    renderFileTree(fileSystem.root, fileTree);
+                } else {
+                    openFile(node);
+                }
+            });
+            
+            container.appendChild(div);
+            
+            if (node.children && node.open) {
+                node.children.forEach(child => {
+                    const childDiv = document.createElement('div');
+                    childDiv.style.marginLeft = '20px';
+                    renderFileNode(child, childDiv, indent + '&nbsp;&nbsp;');
+                    container.appendChild(childDiv);
+                });
+            }
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (ext === 'html') return '🌐';
+            if (ext === 'css') return '🎨';
+            if (ext === 'subx') return '📜';
+            return '📄';
+        }
+
+        function closeAllFolders(node = fileSystem.root) {
+            node.open = false;
+            if (node.children) {
+                node.children.forEach(child => {
+                    if (child.type === 'folder') {
+                        closeAllFolders(child);
+                    }
+                });
+            }
+        }
+
+        // Abrir archivo
+        function openFile(file) {
+            fileSystem.currentFile = file;
+            editor.value = file.content;
+            
+            // Actualizar UI
+            currentFileNameSpan.textContent = file.name;
+            fileTypeSpan.textContent = file.language === 'subx' ? 'SubCode X' : 
+                                     file.language === 'html' ? 'HTML' : 
+                                     file.language === 'css' ? 'CSS' : 'Texto';
+            
+            // Resaltado de sintaxis
+            aplicarResaltado();
+            
+            // Agregar a pestañas si no está abierto
+            if (!fileSystem.openTabs.some(tab => tab.name === file.name)) {
+                fileSystem.openTabs.push(file);
+                renderTabs();
+            }
+            
+            // Activar pestaña
+            setActiveTab(file.name);
+            
+            // Guardar estado en historial
+            editHistory.saveState(file.name, file.content);
+            
+            // Actualizar previsualización si es HTML
+            if (file.language === 'html') {
+                actualizarPreview();
+            }
+            
+            statusMessage.textContent = `Archivo abierto: ${file.name}`;
+        }
+
+        // Renderizar pestañas
+        function renderTabs() {
+            tabsContainer.innerHTML = '';
+            fileSystem.openTabs.forEach(file => {
+                const tab = document.createElement('div');
+                tab.className = 'tab';
+                if (fileSystem.currentFile === file) {
+                    tab.classList.add('active');
+                }
+                
+                tab.innerHTML = `
+                    <span>${getFileIcon(file.name)}</span>
+                    <span>${file.name}</span>
+                    <span class="tab-close" onclick="cerrarPestana(event, '${file.name}')">✕</span>
+                `;
+                
+                tab.addEventListener('click', () => openFile(file));
+                tabsContainer.appendChild(tab);
+            });
+        }
+
+        function setActiveTab(filename) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.includes(filename)) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+
+        function cerrarPestana(event, filename) {
+            event.stopPropagation();
+            const index = fileSystem.openTabs.findIndex(file => file.name === filename);
+            if (index !== -1) {
+                fileSystem.openTabs.splice(index, 1);
+                renderTabs();
+                
+                // Si cerramos el archivo actual, abrir el siguiente
+                if (fileSystem.currentFile && fileSystem.currentFile.name === filename) {
+                    if (fileSystem.openTabs.length > 0) {
+                        openFile(fileSystem.openTabs[0]);
+                    } else {
+                        // No hay pestañas abiertas
+                        fileSystem.currentFile = null;
+                        editor.value = '';
+                        currentFileNameSpan.textContent = 'Sin archivo';
+                        fileTypeSpan.textContent = 'Ninguno';
+                        aplicarResaltado();
+                    }
+                }
+            }
+        }
+
+        // Crear nuevo archivo
+        function crearNuevoArchivo() {
+            const nombre = prompt("Nombre del nuevo archivo (ej: script.subx):", "nuevo.subx");
+            if (nombre) {
+                const nuevoArchivo = {
+                    name: nombre,
+                    type: 'file',
+                    content: '',
+                    language: nombre.endsWith('.subx') ? 'subx' : 
+                              nombre.endsWith('.html') ? 'html' : 
+                              nombre.endsWith('.css') ? 'css' : 'text'
+                };
+                
+                fileSystem.root.children.push(nuevoArchivo);
+                renderFileTree(fileSystem.root, fileTree);
+                openFile(nuevoArchivo);
+                statusMessage.textContent = `Archivo creado: ${nombre}`;
+            }
+        }
+
+        // Crear nueva carpeta
+        function crearNuevaCarpeta() {
+            const nombre = prompt("Nombre de la nueva carpeta:", "nueva-carpeta");
+            if (nombre) {
+                const nuevaCarpeta = {
+                    name: nombre,
+                    type: 'folder',
+                    children: [],
+                    open: true
+                };
+                
+                fileSystem.root.children.push(nuevaCarpeta);
+                renderFileTree(fileSystem.root, fileTree);
+                statusMessage.textContent = `Carpeta creada: ${nombre}`;
+            }
+        }
+
+        // Guardar archivo actual
+        function guardarArchivo() {
+            if (fileSystem.currentFile) {
+                fileSystem.currentFile.content = editor.value;
+                statusMessage.textContent = `Archivo guardado: ${fileSystem.currentFile.name}`;
+            } else {
+                statusMessage.textContent = "No hay archivo abierto para guardar";
+            }
+        }
+
+        // Guardar todos los archivos
+        function guardarTodo() {
+            fileSystem.openTabs.forEach(file => {
+                file.content = editor.value;
+            });
+            statusMessage.textContent = "Todos los archivos guardados";
+        }
+
+        // Actualizar previsualización web
+        function actualizarPreview() {
+            if (fileSystem.currentFile && fileSystem.currentFile.language === 'html') {
+                webPreview.srcdoc = fileSystem.currentFile.content;
+                previewInfo.textContent = fileSystem.currentFile.name;
+            } else {
+                webPreview.srcdoc = '<body><h1>Selecciona un archivo HTML</h1></body>';
+                previewInfo.textContent = "No hay HTML para previsualizar";
+            }
+        }
+
+        // Funciones de historial
+        function deshacer() {
+            if (fileSystem.currentFile) {
+                const contenido = editHistory.undo(fileSystem.currentFile.name);
+                if (contenido !== null) {
+                    editor.value = contenido;
+                    aplicarResaltado();
+                    statusMessage.textContent = `Deshacer: ${fileSystem.currentFile.name}`;
+                }
+            }
+        }
+
+        function rehacer() {
+            if (fileSystem.currentFile) {
+                const contenido = editHistory.redo(fileSystem.currentFile.name);
+                if (contenido !== null) {
+                    editor.value = contenido;
+                    aplicarResaltado();
+                    statusMessage.textContent = `Rehacer: ${fileSystem.currentFile.name}`;
+                }
+            }
+        }
+
         // Actualizar números de línea
         function actualizarLineas() {
             const lineas = editor.value.split('\n');
@@ -684,6 +1272,11 @@ decir &quot;Bienvenido a &quot; + nombre"></textarea>
             
             lineCountSpan.textContent = numeroLineas;
             charCountSpan.textContent = editor.value.length;
+            
+            // Guardar en historial
+            if (fileSystem.currentFile) {
+                editHistory.saveState(fileSystem.currentFile.name, editor.value);
+            }
         }
 
         // Resaltado de sintaxis
@@ -695,6 +1288,14 @@ decir &quot;Bienvenido a &quot; + nombre"></textarea>
 
         // Ejecutar código
         function ejecutarCodigo() {
+            if (!fileSystem.currentFile || fileSystem.currentFile.language !== 'subx') {
+                mostrarOutput([{
+                    type: 'error',
+                    message: '❌ Solo se puede ejecutar código SubCode X (.subx)'
+                }]);
+                return;
+            }
+            
             const codigo = editor.value;
             if (!codigo.trim()) {
                 mostrarOutput([{
@@ -712,6 +1313,33 @@ decir &quot;Bienvenido a &quot; + nombre"></textarea>
             setTimeout(() => {
                 const resultado = interprete.interpretar(codigo);
                 mostrarOutput(resultado);
+                
+                // Si se generó HTML, mostrarlo
+                const htmlGenerado = interprete.generarHTML();
+                if (htmlGenerado && htmlGenerado.includes('<html>')) {
+                    mostrarOutput([{
+                        type: 'success',
+                        message: '🌐 HTML generado correctamente'
+                    }]);
+                    
+                    // Buscar o crear archivo index.html
+                    let htmlFile = fileSystem.root.children.find(f => f.name === 'index.html');
+                    if (!htmlFile) {
+                        htmlFile = {
+                            name: 'index.html',
+                            type: 'file',
+                            content: htmlGenerado,
+                            language: 'html'
+                        };
+                        fileSystem.root.children.push(htmlFile);
+                    } else {
+                        htmlFile.content = htmlGenerado;
+                    }
+                    
+                    // Abrir el archivo HTML
+                    openFile(htmlFile);
+                    actualizarPreview();
+                }
             }, 100);
         }
 
@@ -755,17 +1383,6 @@ decir &quot;Bienvenido a &quot; + nombre"></textarea>
             outputContainer.innerHTML = '<div class="output-line output-success">✅ Salida limpiada</div>';
         }
 
-        // Crear nuevo archivo
-        function crearNuevoArchivo() {
-            editor.value = '';
-            fileNameSpan.textContent = 'programa.subx';
-            actualizarLineas();
-            mostrarOutput([{
-                type: 'success',
-                message: '📄 Nuevo archivo creado'
-            }]);
-        }
-
         // Cargar ejemplo
         function cargarEjemplo() {
             const ejemplo = `# SubCode X - Programa de Ejemplo
@@ -807,11 +1424,29 @@ saludar()
 esperar 1
 despedida()
 
+# Crear página web
+pagina "index.html"
+titulo "Mi Página Web"
+estilo "body { background: #222; color: white; font-family: Arial; }"
+estilo "h1 { color: #ff5555; }"
+elemento "h1" "Bienvenido a SubCode X"
+elemento "p" "Esta página fue creada con el lenguaje SubCode X"
+elemento "p" "Creada por " + nombre
+consola "Página generada correctamente"
+
 decir "🎯 Programa completado"`;
 
+            if (!fileSystem.currentFile) {
+                crearNuevoArchivo();
+            }
+            
             editor.value = ejemplo;
-            fileNameSpan.textContent = 'ejemplo.subx';
-            actualizarLineas();
+            aplicarResaltado();
+            
+            if (fileSystem.currentFile) {
+                fileSystem.currentFile.content = ejemplo;
+            }
+            
             mostrarOutput([{
                 type: 'success',
                 message: '📖 Ejemplo cargado'
@@ -826,6 +1461,18 @@ decir "🎯 Programa completado"`;
 
         // Atajos de teclado
         editor.addEventListener('keydown', (e) => {
+            // Ctrl+Z para deshacer
+            if (e.ctrlKey && e.key === 'z') {
+                e.preventDefault();
+                deshacer();
+            }
+            
+            // Ctrl+Y para rehacer
+            if (e.ctrlKey && e.key === 'y') {
+                e.preventDefault();
+                rehacer();
+            }
+            
             // Ctrl+Enter para ejecutar
             if (e.ctrlKey && e.key === 'Enter') {
                 e.preventDefault();
@@ -844,8 +1491,8 @@ decir "🎯 Programa completado"`;
         });
 
         // Inicializar
+        initFileSystem();
         actualizarLineas();
-        cargarEjemplo();
     </script>
 </body>
 </html>
